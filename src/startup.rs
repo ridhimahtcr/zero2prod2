@@ -2,7 +2,7 @@
 use crate::routes::{subscribe};
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
-use sqlx::{PgPool, Pool, Postgres};
+use sqlx::{ Pool, Postgres};
 use std::net::TcpListener;
 use crate::health_check;
 use actix_web::web::Data;
