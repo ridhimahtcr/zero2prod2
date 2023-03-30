@@ -1,5 +1,5 @@
 //! src/routes/subscriptions.rs
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 use chrono::Utc;
