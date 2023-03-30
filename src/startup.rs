@@ -1,5 +1,4 @@
 //! src/startup.rs
-use crate::routes::{subscribe};
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use sqlx::{PgPool};
@@ -11,7 +10,7 @@ use crate::email_client::EmailClient;
 use crate::configuration::Settings;
 use sqlx::postgres::PgPoolOptions;
 use crate::configuration::DatabaseSettings;
-use crate::routes::confirm;
+use crate::routes::{confirm, subscribe};
 
 
 pub struct Application {
