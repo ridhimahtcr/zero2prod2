@@ -13,7 +13,11 @@ use crate::configuration::DatabaseSettings;
 use crate::routes::{confirm, subscribe, publish_newsletter};
 use crate::routes::{home, login_form};
 use crate::routes::login;
-use secrecy::Secret;
+use secrecy::{ExposeSecret, Secret};
+use actix_web::cookie::Key;
+use actix_web_flash_messages::FlashMessagesFramework;
+use actix_web_flash_messages::storage::CookieMessageStore;
+
 
 
 pub struct Application {
@@ -95,8 +99,14 @@ fn run(
     let db_pool = Data::new(db_pool);
     let email_client = Data::new(email_client);
     let base_url = Data::new(ApplicationBaseUrl(base_url));
+    let message_store = CookieMessageStore::builder(
+        Key::from(hmac_secret.expose_secret().as_bytes())
+    ).build();
+    let message_framework = FlashMessagesFramework::builder(message_store).build();
     let server = HttpServer::new(move || {
         App::new()
+            .wrap(TracingLogger::default())
+            .wrap(message_framework.clone())
             .wrap(TracingLogger::default())
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
