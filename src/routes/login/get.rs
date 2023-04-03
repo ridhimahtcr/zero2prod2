@@ -1,9 +1,7 @@
-use actix_web::{web, HttpResponse, http::header::ContentType};
+use actix_web::{ HttpResponse, http::header::ContentType};
 use crate::startup::HmacSecret;
 use hmac::{Hmac, Mac};
 use secrecy::ExposeSecret;
-use actix_web::HttpRequest;
-use actix_web::cookie::{Cookie, time::Duration};
 use actix_web_flash_messages::{IncomingFlashMessages, Level};
 use std::fmt::Write;
 

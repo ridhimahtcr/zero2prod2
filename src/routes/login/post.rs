@@ -6,7 +6,6 @@ use sqlx::PgPool;
 use crate::authentication::AuthError;
 use actix_web::{web};
 use actix_web::error::InternalError;
-use actix_web::cookie::Cookie;
 use actix_web_flash_messages::FlashMessage;
 
 
