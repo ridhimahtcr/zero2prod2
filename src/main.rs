@@ -1,64 +1,48 @@
-//! src/main.rs
-
-
+use std::fmt::{Debug, Display};
+use tokio::task::JoinError;
 use zero2prod2::configuration::get_configuration;
+use zero2prod2::issue_delivery_worker::run_worker_until_stopped;
 use zero2prod2::startup::Application;
 use zero2prod2::telemetry::{get_subscriber, init_subscriber};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let subscriber = get_subscriber(
-        "zero2prod".into(), "info".into(), std::io::stdout
-    );
+    let subscriber = get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
 
     let configuration = get_configuration().expect("Failed to read configuration.");
-    /*let server = build(configuration).await?;
-    server.await?;
-    Ok(());*/
+    let application = Application::build(configuration.clone()).await?;
+    let application_task = tokio::spawn(application.run_until_stopped());
+    let worker_task = tokio::spawn(run_worker_until_stopped(configuration));
 
+    tokio::select! {
+        o = application_task => report_exit("API", o),
+        o = worker_task =>  report_exit("Background worker", o),
+    };
 
-    let application = Application::build(configuration).await?;
-    application.run_until_stopped().await?;
     Ok(())
 }
 
-
-
-
-
-
-/*async fn main() -> Result<(), std::io::Error> {
-    let subscriber = get_subscriber(
-        "zero2prod2".into(), "info".into(), std::io::stdout
-    );
-
-    init_subscriber(subscriber);
-
-    let configuration = get_configuration().expect("Failed to read configuration.");
-
-
-    let connection_pool = PgPoolOptions::new()
-        .acquire_timeout(std::time::Duration::from_secs(2))
-        .connect_lazy_with(configuration.database.with_db());
-
-    let sender_email = configuration.email_client.sender()
-        .expect("Invalid sender email address.");
-    let timeout = configuration.email_client.timeout();
-    let email_client = EmailClient::new(
-        configuration.email_client.base_url,
-        sender_email,
-        configuration.email_client.authorization_token,
-        timeout
-    );
-
-
-    let address = format!(
-        "{}:{}",
-        configuration.application.host, configuration.application.port
-    );
-    let listener = TcpListener::bind(address)?;
-     run(listener, connection_pool, email_client)?.await?;
-    Ok(())
+fn report_exit(task_name: &str, outcome: Result<Result<(), impl Debug + Display>, JoinError>) {
+    match outcome {
+        Ok(Ok(())) => {
+            tracing::info!("{} has exited", task_name)
+        }
+        Ok(Err(e)) => {
+            tracing::error!(
+                error.cause_chain = ?e,
+                error.message = %e,
+                "{} failed",
+                task_name
+            )
+        }
+        Err(e) => {
+            tracing::error!(
+                error.cause_chain = ?e,
+                error.message = %e,
+                "{}' task failed to complete",
+                task_name
+            )
+        }
+    }
 }
-*/

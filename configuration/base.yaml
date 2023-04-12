@@ -11,10 +11,10 @@ database:
   username: "ridhimakhyalappa"
   password: "ridhima@7557"
   database_name: "ridhimakhyalappa"
+  require_ssl: false
 email_client:
   base_url: "localhost"
   sender_email: "ridhima_khyalappa@heartcore.co.jp"
   authorization_token: "my-secret-token"
   timeout_milliseconds: 10000
-
 redis_uri: "redis://127.0.0.1:6379"
